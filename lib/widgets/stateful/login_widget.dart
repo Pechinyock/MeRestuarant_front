@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:me_restaurant/data/providers/data_provider_user.dart';
+import 'package:me_restaurant/routes/main.dart';
 
 class LoginWidget extends StatefulWidget{
   const LoginWidget({super.key});
@@ -10,7 +11,7 @@ class LoginWidget extends StatefulWidget{
 
 class LoginWidgetState extends State<LoginWidget>{
   final passwordController = TextEditingController();
-  final emailController = TextEditingController();
+  final emailController = TextEditingController();    
 
   @override
   void dispose(){
@@ -21,33 +22,37 @@ class LoginWidgetState extends State<LoginWidget>{
 
   @override
   Widget build(BuildContext context){
-    return Column(
-        children: 
-        [
-          TextField(
-            controller: emailController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Email'
+    return SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        reverse: true,
+        child: Column(
+          children: 
+          [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Email'
+              ),
             ),
-          ),
+    
+            const Padding(
+              padding: EdgeInsets.all(5)
+            ),
+    
+            TextField(       
+              controller: passwordController,     
+              obscureText: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Password'),
+            ),
 
-          const Padding(
-            padding: EdgeInsets.all(5)
-          ),
+            const Padding(
+              padding: EdgeInsets.all(5)
+            ),
 
-          TextField(       
-            controller: passwordController,     
-            obscureText: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password'),
-          ),
-
-          SizedBox(
-            width: 300,
-            height: 50,
-            child: TextButton (            
+            TextButton (            
               style: ButtonStyle(
                 foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                 overlayColor: MaterialStateProperty.resolveWith<Color?>(
@@ -60,7 +65,7 @@ class LoginWidgetState extends State<LoginWidget>{
                     }
                     return null;
                   }
-                )
+                ),                
             ),
             onPressed: () async {
               var pass = passwordController.text;
@@ -68,13 +73,28 @@ class LoginWidgetState extends State<LoginWidget>{
               if(email.isEmpty || pass.isEmpty){
                 return;
               }
-              await getTokens(email, pass);              
+              try{
+                await getTokens(email, pass);
+                if(!context.mounted){
+                  return;
+                }
+                Navigator.of(context).pushAndRemoveUntil(                  
+                  MaterialPageRoute(builder: (context) => const MainRoute()),
+                  ModalRoute.withName('/home')
+                );
+              }
+              catch(exeption){
+                print(exeption.toString());
+                return;
+              }              
             },
-            child: const Text('Login')
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 100.0),
+              child: Text('Login'),
             )
-          ),
-        ],
-      );    
-  }
-
+            ),
+          ],
+        ),
+    );
+      }
 }
