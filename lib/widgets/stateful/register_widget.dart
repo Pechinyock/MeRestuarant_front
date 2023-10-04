@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:me_restaurant/data/models/user_register_model.dart';
 import 'package:me_restaurant/data/providers/data_provider_user.dart';
-import 'package:me_restaurant/pages/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginWidget extends StatefulWidget{
-  const LoginWidget({super.key});
+
+class RegisterWidget extends StatefulWidget{
+  const RegisterWidget({super.key});
 
   @override
-  State<LoginWidget> createState() => LoginWidgetState();
+  State<RegisterWidget> createState() => RegisterWidgetState();
 }
 
-class LoginWidgetState extends State<LoginWidget>{
+class RegisterWidgetState extends State<RegisterWidget>{
   final passwordController = TextEditingController();
-  final emailController = TextEditingController();    
+  final emailController = TextEditingController();
+  final retryPasswordController = TextEditingController();
 
   @override
   void dispose(){
     passwordController.dispose();
     emailController.dispose();
+    retryPasswordController.dispose();
     super.dispose();
   }
 
@@ -49,6 +51,19 @@ class LoginWidgetState extends State<LoginWidget>{
         const Padding(
           padding: EdgeInsets.all(5)
         ),
+    
+        TextField(       
+          controller: retryPasswordController,     
+          obscureText: true,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Retry password'
+          ),
+        ),
+
+        const Padding(
+          padding: EdgeInsets.all(5)
+        ),
 
         TextButton (            
           style: ButtonStyle(
@@ -66,33 +81,32 @@ class LoginWidgetState extends State<LoginWidget>{
             ),                
           ),
         onPressed: () async {
-          var pass = passwordController.text;
-          var email = emailController.text;
-          if(email.isEmpty || pass.isEmpty){
+          if(emailController.text.isEmpty){
             return;
           }
+          if(passwordController.text.isEmpty){
+            return;
+          }          
+          if(passwordController.text != retryPasswordController.text){
+            print('Passwords are not the same!');
+            return;
+          }
+          var newUserModel = UserRegisterModel(
+            email: emailController.text,
+            password: passwordController.text,
+            retryPassword: passwordController.text
+          );
           try{
-            final jwt = await getTokens(email, pass);
-            final SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('accessToken', jwt.accessToken);
-            await prefs.setString('refreshToken', jwt.refreshToken);
-            if(!context.mounted){
-              return;
-            }
-            Navigator.of(context).pushAndRemoveUntil(                  
-              MaterialPageRoute(builder: (context) => const MainPage()),
-              ModalRoute.withName('/home')
-            );
-            
+            await registerUser(newUserModel);
           }
           catch(exeption){
             print(exeption.toString());
-            return;
-          }              
+          }
+          
         },
         child: const Padding(
           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 100.0),
-          child: Text('Login'),
+          child: Text('Register'),
           )
         ),
       ],
