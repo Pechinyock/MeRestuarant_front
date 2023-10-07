@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:me_restaurant/constants/cache_constants.dart';
 import 'package:me_restaurant/data/providers/data_provider_user.dart';
 import 'package:me_restaurant/pages/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +23,7 @@ class LoginWidgetState extends State<LoginWidget>{
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context){    
     return Column(
       children: 
       [
@@ -65,7 +66,7 @@ class LoginWidgetState extends State<LoginWidget>{
               }
             ),                
           ),
-        onPressed: () async {
+        onPressed: () async {          
           var pass = passwordController.text;
           var email = emailController.text;
           if(email.isEmpty || pass.isEmpty){
@@ -74,8 +75,10 @@ class LoginWidgetState extends State<LoginWidget>{
           try{
             final jwt = await getTokens(email, pass);
             final SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('accessToken', jwt.accessToken);
-            await prefs.setString('refreshToken', jwt.refreshToken);
+            final ssss =prefs.getString(CacheConstants.accessToken);
+            print('Cache from splash screen:' + ssss.toString());
+            await prefs.setString(CacheConstants.accessToken, jwt.accessToken);
+            await prefs.setString(CacheConstants.refreshToken, jwt.refreshToken);
             if(!context.mounted){
               return;
             }
